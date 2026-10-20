@@ -6,7 +6,9 @@
 
 import type { MediaRef } from '../../shared/protocol.ts'
 
-export const EMBED_ORIGIN = 'https://framextv.xyz'
+// frameXTV moved its player here from framextv.xyz in October 2026; the old address
+// redirects. If the player ever goes silent again, check where the embed redirects to.
+export const EMBED_ORIGIN = 'https://framextv.cc'
 
 export function embedUrl(media: MediaRef, opts: { start: number; autoplay: boolean; muted?: boolean; provider?: string }) {
   const path =
