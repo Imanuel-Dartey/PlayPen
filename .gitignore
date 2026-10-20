@@ -1,0 +1,12 @@
+node_modules
+dist
+.DS_Store
+
+# Local settings and keys (Vercel holds the production copies)
+.env
+.env.*
+!.env.example
+
+# Tool output
+.vercel
+.early.coverage
