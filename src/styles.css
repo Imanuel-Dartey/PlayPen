@@ -2375,3 +2375,172 @@ img {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ---------- active users (/stats) ---------- */
+.stats-page {
+  height: 100%;
+  overflow-y: auto;
+}
+.stats {
+  max-width: 60rem;
+  margin: 0 auto;
+  padding: clamp(1.5rem, 5vw, 4rem) 16px 3rem;
+}
+.stats-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 2.5rem;
+}
+.stats-title {
+  margin: 0;
+  font-size: var(--t-xl);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+}
+.stats-since {
+  margin: 0.4rem 0 0;
+  color: var(--haze);
+}
+.stats-note {
+  max-width: 40rem;
+  padding: 0.9rem 1.1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--velvet);
+}
+.stats-error {
+  border-color: var(--danger);
+}
+.stats-main,
+.stats-more {
+  display: grid;
+  margin: 0;
+}
+.stats-main {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.5rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid var(--line);
+}
+.stats-more {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.25rem 1.5rem;
+  padding: 1.75rem 0 2.5rem;
+}
+.stats-figure {
+  display: flex;
+  flex-direction: column;
+}
+/* The number reads first; the label stays first in the markup for screen readers. */
+.stats-figure dt {
+  order: 1;
+  font-weight: 600;
+}
+.stats-figure dd {
+  margin: 0;
+}
+.stats-figure .stats-value {
+  order: 0;
+  font-size: var(--t-xxl);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  margin-bottom: 0.35rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--sea);
+}
+.stats-more .stats-figure .stats-value {
+  font-size: var(--t-lg);
+  color: var(--moon);
+  margin-bottom: 0.15rem;
+}
+.stats-more .stats-figure dt {
+  color: var(--haze);
+  font-weight: 400;
+  font-size: var(--t-sm);
+}
+.stats-detail {
+  order: 2;
+  color: var(--haze);
+  font-size: var(--t-sm);
+}
+.stats-chart figcaption .stats-detail {
+  display: block;
+  font-weight: 400;
+}
+.stats-chart {
+  margin: 0;
+}
+.stats-chart figcaption {
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+}
+.stats-chart svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.stats-axis {
+  stroke: var(--line);
+}
+.stats-bar {
+  fill: var(--lilac);
+  opacity: 0.85;
+}
+.stats-bar:hover {
+  opacity: 1;
+}
+.stats-bar-today {
+  fill: var(--rose);
+}
+.stats-ticks {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.35rem;
+  color: var(--haze);
+  font-size: var(--t-sm);
+}
+.stats-foot {
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--line);
+  color: var(--haze);
+  font-size: var(--t-sm);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 1.5rem;
+}
+.stats-foot p {
+  flex: 1 1 100%;
+  max-width: 38rem;
+  margin: 0;
+}
+.stats-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--moon);
+  cursor: pointer;
+}
+.stats-toggle input {
+  width: 1.05rem;
+  height: 1.05rem;
+  accent-color: var(--sea);
+}
+@media (max-width: 760px) {
+  .stats-main {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .stats-more {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .stats-main .stats-figure .stats-value {
+    font-size: var(--t-xl);
+  }
+}

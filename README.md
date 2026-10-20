@@ -190,6 +190,20 @@ does about it:
 - If the browser blocks autoplay, PlayPen offers **Press play in the player**, which lets one
   click through to the player's own play button in the same way.
 
+## Active users
+
+`/stats` (not linked from the app) shows how many people have used PlayPen: all time, in the
+last 30 and 7 days, today, how many came back on another day, and a chart of the last 90
+days. **Copy summary** puts the headline numbers into one sentence.
+
+- A user is a browser that had PlayPen open that day, whether or not anything was playing.
+  The same person on a phone and a laptop counts twice.
+- All that's stored is the browser's random id and the days it was active, in the
+  `active_days` table (see the "active users" section of `supabase/setup.sql`). The anon key
+  can't read that table; it can only mark itself active and fetch the totals.
+- Only the live site counts. Local development and automated browsers are left out, and
+  **Count this browser** on the stats page turns counting off for that browser.
+
 ## Known limits
 
 - The frameXTV embed only reports the time, not play/pause, so playing vs. buffering is

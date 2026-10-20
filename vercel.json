@@ -1,3 +1,6 @@
 {
-  "rewrites": [{ "source": "/r/:code", "destination": "/index.html" }]
+  "rewrites": [
+    { "source": "/r/:code", "destination": "/index.html" },
+    { "source": "/stats", "destination": "/index.html" }
+  ]
 }
