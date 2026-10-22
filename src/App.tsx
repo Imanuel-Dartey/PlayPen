@@ -2,29 +2,18 @@ import { useEffect, useState } from 'react'
 import { ROOM_CODE_PATTERN } from '../shared/protocol.ts'
 import { Landing, NamePrompt } from './components/Landing.tsx'
 import { Room } from './components/Room.tsx'
-import { Stats } from './components/Stats.tsx'
 import { readName } from './lib/format.ts'
-import { useActiveUser } from './lib/usage.ts'
 
 function roomFromPath(): string | null {
   const code = location.pathname.match(/^\/r\/([^/]+)\/?$/)?.[1]?.toLowerCase()
   return code && ROOM_CODE_PATTERN.test(code) ? code : null
 }
 
-const onStatsPage = /^\/stats\/?$/.test(location.pathname)
-
 export function App() {
-  if (onStatsPage) return <Stats />
-  return <Watch />
-}
-
-function Watch() {
   const [code, setCode] = useState(roomFromPath)
   // Entering from the landing page counts as the click browsers want before playing sound,
   // so the name step is only shown to people arriving straight from an invite link.
   const [name, setName] = useState<string | null>(() => (code ? null : readName() || null))
-
-  useActiveUser()
 
   useEffect(() => {
     const onPop = () => setCode(roomFromPath())
