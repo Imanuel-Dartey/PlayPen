@@ -1,27 +1,24 @@
-// Title search and metadata from the frameXTV backend (TMDB-backed).
-//
-// frameXTV's API no longer lets other sites read it from the browser, so requests go through
-// PlayPen's own relay (api/framex.ts), which also tries frameXTV's second host when one fails.
+// Title search and metadata from the frameXTV backend (CORS-open, TMDB-backed).
 
-/** The relay's URL for a frameXTV path such as `/season?id=1&season=2`. */
-function relayUrl(path: string): string {
-  const [endpoint, query] = path.slice(1).split('?')
-  return `/api/framex?path=${endpoint}${query ? `&${query}` : ''}`
-}
+const API_BASES = ['https://api.framextv.tech', 'https://api.framextv.xyz']
+let activeBase = 0
 
 async function get<T>(path: string, signal?: AbortSignal): Promise<T> {
-  let res: Response
-  try {
-    res = await fetch(relayUrl(path), { signal })
-  } catch (err) {
-    if ((err as Error).name === 'AbortError') throw err
-    throw new Error('The catalog is unreachable.')
+  let lastError: unknown
+  for (let attempt = 0; attempt < API_BASES.length; attempt++) {
+    const base = API_BASES[(activeBase + attempt) % API_BASES.length]
+    try {
+      const res = await fetch(`${base}${path}`, { signal })
+      if (res.status >= 500) throw new Error(`HTTP ${res.status}`)
+      if (!res.ok) throw new Error(`The catalog returned HTTP ${res.status}.`)
+      activeBase = (activeBase + attempt) % API_BASES.length
+      return (await res.json()) as T
+    } catch (err) {
+      if ((err as Error).name === 'AbortError') throw err
+      lastError = err
+    }
   }
-  if (!res.ok) {
-    const detail = await res.json().then((b: { error?: string }) => b.error, () => undefined)
-    throw new Error(detail ?? `The catalog returned HTTP ${res.status}.`)
-  }
-  return (await res.json()) as T
+  throw lastError instanceof Error ? lastError : new Error('The catalog is unreachable.')
 }
 
 const NO_IMAGE = 'placeholder.com'
@@ -66,7 +63,7 @@ const isWatchable = (r: { type?: string }) => r.type === 'movie' || r.type === '
 
 export async function searchTitles(query: string, signal?: AbortSignal, page = 1): Promise<Page<SearchResult>> {
   const data = await get<{ results?: RawResult[]; totalPages?: number }>(
-    `/search?q=${encodeURIComponent(query)}&type=all&page=${page}`,
+    `/api/search?q=${encodeURIComponent(query)}&type=all&page=${page}`,
     signal,
   )
   return {
@@ -95,7 +92,7 @@ export async function discover(q: DiscoverQuery, signal?: AbortSignal): Promise<
   if (q.year) params.set('year', q.year)
   if (q.minRating) params.set('min_rating', q.minRating)
   if (q.sort) params.set('sort', q.sort)
-  const data = await get<{ results?: RawResult[]; totalPages?: number }>(`/discover?${params}`, signal)
+  const data = await get<{ results?: RawResult[]; totalPages?: number }>(`/api/discover?${params}`, signal)
   return {
     // Trust the type we asked for when an item doesn't state its own.
     items: (data.results ?? []).map((r) => toResult({ ...r, type: r.type || q.type })).filter(isWatchable),
@@ -123,7 +120,7 @@ export async function getDetails(type: 'movie' | 'tv', id: string, signal?: Abor
     tagline?: string
     cast?: Array<{ name?: string }>
     rating?: string | number
-  }>(`/details?id=${encodeURIComponent(id)}&type=${type}`, signal)
+  }>(`/api/details?id=${encodeURIComponent(id)}&type=${type}`, signal)
   return {
     overview: d.overview,
     genres: d.genres ?? [],
@@ -180,7 +177,7 @@ async function fetchShow(id: string): Promise<ShowDetails> {
     poster?: string
     backdrop?: string
     seasons?: Array<{ season_number: number; name: string; episode_count: number }>
-  }>(`/tv/${encodeURIComponent(id)}`)
+  }>(`/api/tv/${encodeURIComponent(id)}`)
   const seasons = (d.seasons ?? [])
     .map((s) => ({ number: s.season_number, name: s.name, episodeCount: s.episode_count }))
     .filter((s) => s.episodeCount > 0)
@@ -204,7 +201,7 @@ export function getSeason(id: string, season: number, signal?: AbortSignal): Pro
 async function fetchSeason(id: string, season: number): Promise<Episode[]> {
   const d = await get<{
     episodes?: Array<{ episode_number: number; name: string; overview?: string; still?: string; air_date?: string }>
-  }>(`/season?id=${encodeURIComponent(id)}&season=${season}`)
+  }>(`/api/season?id=${encodeURIComponent(id)}&season=${season}`)
   return (d.episodes ?? []).map((e) => ({
     number: e.episode_number,
     name: e.name,
@@ -221,7 +218,7 @@ export interface Provider {
 }
 
 export async function getProviders(): Promise<Provider[]> {
-  const d = await get<{ providers?: Array<Provider & { status?: string }> }>('/providers')
+  const d = await get<{ providers?: Array<Provider & { status?: string }> }>('/api/providers')
   return (d.providers ?? []).filter((p) => p.status !== 'unavailable')
 }
 
@@ -237,7 +234,7 @@ export async function getSubtitleTracks(
   media: { type: 'movie' | 'tv'; id: string; season?: number; episode?: number },
   signal?: AbortSignal,
 ): Promise<SubtitleTrack[]> {
-  let path = `/subtitles?id=${encodeURIComponent(media.id)}&type=${media.type}`
+  let path = `/api/subtitles?id=${encodeURIComponent(media.id)}&type=${media.type}`
   if (media.type === 'tv') path += `&season=${media.season}&episode=${media.episode}`
   const d = await get<{ subtitles?: Array<{ url: string; lang?: string; language?: string; label?: string; isDefault?: boolean }> }>(
     path,
@@ -253,7 +250,7 @@ export async function getSubtitleTracks(
     }))
 }
 
-/** Subtitle files usually allow any site to read them; frameXTV's proxy, through the relay, covers the ones that don't. */
+/** Subtitle files usually allow any site to read them; frameXTV's proxy covers the ones that don't. */
 export async function fetchSubtitleFile(url: string, signal?: AbortSignal): Promise<ArrayBuffer> {
   try {
     const res = await fetch(url, { signal })
@@ -261,7 +258,7 @@ export async function fetchSubtitleFile(url: string, signal?: AbortSignal): Prom
   } catch (err) {
     if ((err as Error).name === 'AbortError') throw err
   }
-  const res = await fetch(relayUrl(`/subtitles/proxy?url=${encodeURIComponent(url)}`), { signal })
+  const res = await fetch(`${API_BASES[activeBase]}/api/subtitles/proxy?url=${encodeURIComponent(url)}`, { signal })
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   return res.arrayBuffer()
 }
