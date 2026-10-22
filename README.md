@@ -1,6 +1,6 @@
 # PlayPen
 
-A private watch-together room for two people. One of you picks a film or episode, and it
+A private watch-together room for me, my girlfriend and some of our friends. One of you picks a film or episode, and it
 opens on both screens. Play, pause and seek apply to both of you, and the timeline shows
 where each of you actually is. Next to the video there's a chat for messages, GIFs and photos,
 and each of you can turn on subtitles in your own language. Browse lets you look around
