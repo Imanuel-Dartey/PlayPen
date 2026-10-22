@@ -6,9 +6,16 @@ where each of you actually is. Next to the video there's a chat for messages, GI
 and each of you can turn on subtitles in your own language. Browse lets you look around
 separately and decide together, with ratings from IMDb, Rotten Tomatoes and Metacritic.
 
-Video comes from the [frameXTV](https://framextv.xyz/api) embed player. Sync between the two
-browsers goes through a free Supabase Realtime channel, so the site itself is fully static
-and can be hosted on Vercel's free tier.
+Video comes from the [frameXTV](https://framextv.cc/api) embed player. Sync between the two
+browsers goes through a free Supabase Realtime channel. The site is static apart from one
+small Vercel Function, so it can be hosted on Vercel's free tier.
+
+The catalog (search, browse lists, seasons, servers, subtitles) comes from frameXTV's API.
+Since October 2026 that API only lets frameXTV's own sites read it from a browser, so
+PlayPen asks through `api/framex.ts`, which relays only the endpoints PlayPen uses and caches
+the answers on Vercel's CDN. `npm run dev` runs the same relay inside the Vite dev server.
+Vercel compiles the function with the project's TypeScript, which has to stay on 5.x:
+TypeScript 7 no longer has the API Vercel's compiler uses.
 
 ## Run it locally
 
