@@ -10,58 +10,16 @@ Video comes from the [frameXTV](https://framextv.cc/api) embed player. Sync betw
 browsers goes through a free Supabase Realtime channel, so the site itself is fully static
 and can be hosted on Vercel's free tier.
 
-## Run it locally
-
-```sh
-npm install
-npm run dev
-```
-
-Open http://localhost:5173. Without Supabase keys the app runs in **local test mode**: two
-tabs of the same browser sync with each other, which is enough to try everything out. Chat
-works there too, with history kept in that browser only.
-
-## Set up Supabase (once, ~3 minutes)
-
-1. Create a free project at [supabase.com](https://supabase.com). Any region near you is fine.
-2. In the project, open **Project Settings → API Keys** and copy:
-   - the **Project URL**
-   - the **anon** / **publishable** key (this key is meant to be public; it ships in the page)
-3. Open the **SQL Editor**, paste in all of [`supabase/setup.sql`](supabase/setup.sql), and
-   click **Run**. This creates the chat's `messages` table and the `chat-media` photo bucket,
-   along with the rules that keep each room's chat private. It's safe to run again.
-4. Make sure Realtime allows public channels: **Realtime → Settings → "Allow public access"**
-   should be on. (It is by default. If it's off, rooms will sit on "Connecting to the room…".)
-5. For local development, put the values in `.env.local` (see `.env.example`).
-
-PlayPen doesn't use your database password or connection string. The browser only ever
-gets the public anon key, and the rules in `setup.sql` decide what that key can do.
-
-## GIFs (optional, free)
+## GIFs 
 
 GIF search uses [KLIPY](https://docs.klipy.com). (Google shut down the Tenor API in June 2026.)
 Sign up at the [KLIPY Partner Dashboard](https://partner.klipy.com), create an app, and set its
 key as `VITE_KLIPY_APP_KEY`. Without a key, everything else works and the GIF button is hidden.
 
-## Ratings (optional, free)
+## Ratings 
 
-Browse shows TMDB's score for every title. For IMDb, Rotten Tomatoes and Metacritic too, get a
-free key from [OMDb](https://www.omdbapi.com/apikey.aspx) (it's emailed to you) and set it as
-`VITE_OMDB_API_KEY`. The free key allows 1,000 lookups a day; PlayPen looks each title up at
+Browse shows TMDB's score for every title. PlayPen looks each title up at
 most once a week per device, only when its card is on screen, and stops at 800 a day per device.
-
-## Deploy to Vercel
-
-1. Push this folder to a GitHub repo, then **Add New → Project** in Vercel and import it.
-   Vercel detects Vite: the build command is `npm run build`, output is `dist`.
-2. Under **Environment Variables**, add `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, and
-   optionally `VITE_KLIPY_APP_KEY` (GIFs) and `VITE_OMDB_API_KEY` (ratings).
-3. Deploy. `vercel.json` makes invite links (`/r/<code>`) load the app.
-
-This project is connected to [Kobalosz/PlayPen](https://github.com/Kobalosz/PlayPen): every
-push to `main` deploys to production, and every other branch gets its own preview link.
-
-If you change the environment variables later, redeploy. Vite bakes them in at build time.
 
 ## Using it
 
